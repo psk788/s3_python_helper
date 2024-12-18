@@ -3,6 +3,7 @@ import logging
 from botocore.exceptions import ClientError
 import boto3
 import os
+from base64 import b64decode
 
 def get_base_directory(path, levels_up=1):
     normalized_path = os.path.normpath(path)
@@ -146,10 +147,11 @@ def download_folder_from_s3(bucket_name, s3_prefix, local_dir = ''):
     except ClientError as e:
         print(f"Error downloading objects from bucket {bucket_name} with prefix {s3_prefix}: {e}")
 
-def initializeEnvirons(profile_name='default'):
-    global s, session, s3_client
+def initializeEnvirons(use_profile=True, profile_name='default'):
+    global session, s3_client
     # Create a session using the SSO profile
-    session = boto3.Session(profile_name=profile_name)
-
-    # Use the session to interact with AWS services
-    s3_client = session.client('s3')
+    if (use_profile):
+        session = boto3.Session(profile_name=profile_name)
+        s3_client = session.client('s3')
+    else:
+        s3_client = boto3.client('s3')
